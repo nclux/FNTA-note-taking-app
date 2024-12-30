@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: app/(tabs)/home.jsx</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: app/(tabs)/home.jsx</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { useState, useEffect } from 'react';
+import { 
+  View, 
+  Text, 
+  SafeAreaView, 
+  TouchableOpacity,
+  homeStylesheet
+} from 'react-native';
+import { 
+  getCurrentUser, 
+  createWorkout, 
+  getUserWorkouts
+} from '../../lib/appwrite';
+import { useRouter } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
+import CreateSplit from '../../components/CreateSplit';
+import { useGlobalContext } from '../../context/GlobalProvider';
+import homeStyles from '../component_styles/HomeStyles';
+
+/**
+ * Home Component
+ * 
+ * This page hosting a main functionality of the app where user can add new workout and exercise in those workout files that they created.
+ * Add new splits button to create a new workout file.
+ * It is also displaying any workout file that user created.
+ * 
+ * @component
+ * @returns {JSX.Element}
+ */
+
+const Home = () => {
+  const [modalVisible, setModalVisible] = useState(false);
+  const [step, setStep] = useState(1);
+  const [splitName, setSplitName] = useState('');
+  const [workouts, setWorkouts] = useState([]);
+  const [exercise, setExercise] = useState('');
+  const [exercises, setExercises] = useState([]);
+  const router = useRouter();
+  const { timeElapsed, formatTime } = useGlobalContext();
+
+  useEffect(() => {
+    /**
+     * Loads the user workouts from the database when the component mount.
+     * 
+     */
+    const loadWorkouts = async () => {
+      try {
+        const currentUser = await getCurrentUser();
+        if (currentUser) {
+          const userWorkouts = await getUserWorkouts(currentUser.$id);
+          setWorkouts(userWorkouts);
+        }
+      } catch (error) {
+        console.error('Error loading splits:', error);
+      }
+    };
+  
+    loadWorkouts();
+  }, []);
+
+  /**
+   * Opens the modal component when adding a new workout split/file.
+   *  
+   * This function sets the modal visibility to true and resets the state for the 
+   * workout creation process.
+   */
+  const loadWorkouts = async () => {
+    try {
+      const currentUser = await getCurrentUser();
+      if (currentUser) {
+        const userWorkouts = await getUserWorkouts(currentUser.$id);
+        setWorkouts(userWorkouts);
+      }
+    } catch (error) {
+      console.error('Error loading workouts:', error);
+    }
+  };
+
+   /**
+   * Opens the modal to add a new workout split.
+   * resets creating new workout state. 
+   * 
+   * @function 
+   * @name handleAddSplit
+   */
+  const handleAddSplit = () => {
+    setModalVisible(true);
+    setStep(1);
+    setSplitName('');
+    setExercises([]);
+  };
+
+  /**
+   * Handles the completion of step one in the modal workout creation.
+   * Validates that a split name(workout name) is entered before proceeding to the next step.
+   * 
+   * @function 
+   * @name handleDoneWorkout
+   */
+  const handleDoneWorkout = () => {
+    if (splitName.trim() === '') {
+      alert('Please enter a split name');
+      return;
+    }
+    setStep(2);
+  };
+
+  /**
+   * Adds an exercise to the list.
+   * Validates that the exercise name has been added.
+   * 
+   * @function 
+   * @name handleAddExercise
+   */
+  const handleAddExercise = () => {
+    if (exercise.trim() === '') {
+      alert('Please enter an exercise name');
+      return;
+    }
+    setExercises([...exercises, exercise]);
+    setExercise('');
+  };
+
+  /**
+   * Handles the completion of step two in the workout file creation.
+   * Creates the workout file and refreshes the list of workouts.
+   * 
+   * @async
+   * @function 
+   * @name handleDoneExercise
+
+  */
+  const handleDoneExercise = async () => {
+    try {
+      const currentUser = await getCurrentUser();
+      if (!currentUser){
+        throw new Error('No logged-in user')
+      }
+
+      const newSplit = await createWorkout(currentUser.$id, splitName, exercises);
+
+      setModalVisible(false);
+      setSplitName('');
+      setExercises([]);
+      setStep(1);
+
+      await loadWorkouts();
+
+    } catch (error) {
+      console.error('error', error);
+      alert('No split created, please try again')
+    }
+  };
+
+  /**
+   * Navigates to the manage_split screen when the workout file is clicked.
+   * 
+   * 
+   * @function 
+   * @name handleSplitPress
+   * @param {Object} workout The selected workout file
+   * 
+   */
+  const handleSplitPress = (workout) => {
+    router.push({
+      pathname: "/workout/manage_split",
+      params: { 
+        workoutName: workout.workout_name, 
+        workoutId: workout.$id 
+      }
+    });
+  };
+
+  return (
+    &lt;SafeAreaView style={homeStyles.container}>
+      &lt;Text style={homeStyles.title}>FNTA: Fitness Note Taking App&lt;/Text>
+      &lt;Text style={homeStyles.version}>Version 1.0.0&lt;/Text>
+      &lt;StatusBar style="light" />
+      &lt;View style={homeStyles.content}>
+        &lt;Text style={homeStyles.timer}>
+          Time Elapsed: {formatTime(timeElapsed)}
+        &lt;/Text>
+        &lt;Text style={homeStyles.subtitle}>Workout records:&lt;/Text>
+        &lt;TouchableOpacity style={homeStyles.addButton} onPress={handleAddSplit}>
+          &lt;Text style={homeStyles.addButtonText}>+ Add new split&lt;/Text>
+        &lt;/TouchableOpacity>
+      
+        &lt;CreateSplit
+          visible={modalVisible}
+          onClose={() => setModalVisible(false)}
+          step={step}
+          splitName={splitName}
+          onSplitNameChange={setSplitName}
+          onDoneStepOne={handleDoneWorkout}
+          exercise={exercise}
+          onExerciseChange={setExercise}
+          onAddExercise={handleAddExercise}
+          exercises={exercises}
+          backToOne={() => setStep(1)}
+          onDoneStepTwo={handleDoneExercise}
+        />
+        &lt;View style={homeStyles.workoutList}>
+          &lt;Text style={homeStyles.currentProgram}>Your Current Program:&lt;/Text>
+            {workouts.map((workout, index) => (
+              &lt;TouchableOpacity 
+                key={workout.$id || index} 
+                style={homeStyles.workoutItem}
+                onPress={() => handleSplitPress(workout)}
+              >
+                &lt;Text style={homeStyles.workoutItemText}>{workout.workout_name}&lt;/Text>
+              &lt;/TouchableOpacity>
+            ))}
+        &lt;/View>
+      &lt;/View>
+    &lt;/SafeAreaView>
+  );
+};
+
+export default Home;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#AuthLayout">AuthLayout</a></li><li><a href="global.html#CreateSplit">CreateSplit</a></li><li><a href="global.html#CustomButton">CustomButton</a></li><li><a href="global.html#FormField">FormField</a></li><li><a href="global.html#GlobalContext">GlobalContext</a></li><li><a href="global.html#GlobalProvider">GlobalProvider</a></li><li><a href="global.html#Home">Home</a></li><li><a href="global.html#ManageWorkout">ManageWorkout</a></li><li><a href="global.html#Profile">Profile</a></li><li><a href="global.html#RootLayout">RootLayout</a></li><li><a href="global.html#SignIn">SignIn</a></li><li><a href="global.html#SignUp">SignUp</a></li><li><a href="global.html#TabsLayout">TabsLayout</a></li><li><a href="global.html#Timer">Timer</a></li><li><a href="global.html#WorkoutLayout">WorkoutLayout</a></li><li><a href="global.html#addExerciseToWorkout">addExerciseToWorkout</a></li><li><a href="global.html#addSet">addSet</a></li><li><a href="global.html#createExercise">createExercise</a></li><li><a href="global.html#createExerciseSet">createExerciseSet</a></li><li><a href="global.html#createUser">createUser</a></li><li><a href="global.html#createWorkout">createWorkout</a></li><li><a href="global.html#fetchPreviousWeekData">fetchPreviousWeekData</a></li><li><a href="global.html#fetchWorkout">fetchWorkout</a></li><li><a href="global.html#formatTime">formatTime</a></li><li><a href="global.html#getCurrentUser">getCurrentUser</a></li><li><a href="global.html#getUserWorkouts">getUserWorkouts</a></li><li><a href="global.html#handleAddExercise">handleAddExercise</a></li><li><a href="global.html#handleAddSplit">handleAddSplit</a></li><li><a href="global.html#handleDoneExercise">handleDoneExercise</a></li><li><a href="global.html#handleDoneWorkout">handleDoneWorkout</a></li><li><a href="global.html#handleInputChange">handleInputChange</a></li><li><a href="global.html#handlePresetRestTime">handlePresetRestTime</a></li><li><a href="global.html#handleSplitPress">handleSplitPress</a></li><li><a href="global.html#handleTimerSheet">handleTimerSheet</a></li><li><a href="global.html#isValidEmail">isValidEmail</a></li><li><a href="global.html#loadWorkout">loadWorkout</a></li><li><a href="global.html#logOut">logOut</a></li><li><a href="global.html#logout">logout</a></li><li><a href="global.html#pauseTimer">pauseTimer</a></li><li><a href="global.html#recommendedHypertrophy">recommendedHypertrophy</a></li><li><a href="global.html#recommendedRestTime">recommendedRestTime</a></li><li><a href="global.html#resetTimer">resetTimer</a></li><li><a href="global.html#saveWorkoutSets">saveWorkoutSets</a></li><li><a href="global.html#signIn">signIn</a></li><li><a href="global.html#startNewSession">startNewSession</a></li><li><a href="global.html#startTimer">startTimer</a></li><li><a href="global.html#strengthRestTime">strengthRestTime</a></li><li><a href="global.html#submit">submit</a></li><li><a href="global.html#updateWeekNumber">updateWeekNumber</a></li><li><a href="global.html#useGlobalContext">useGlobalContext</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.3</a> on Mon Aug 12 2024 06:52:53 GMT+0100 (British Summer Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: app/(auth)/sign-up.jsx</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: app/(auth)/sign-up.jsx</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { useState } from 'react';
+import { 
+  SafeAreaView, 
+  View, 
+  Text, 
+  TouchableOpacity, 
+  Alert 
+} from 'react-native';
+import { StatusBar } from 'expo-status-bar';
+import FormField from '../../components/FormField';
+import CustomButton from '../../components/CustomButton';
+import { Link, router } from 'expo-router';
+import { createUser } from '../../lib/appwrite';
+import { useGlobalContext } from '../../context/GlobalProvider';
+import signUpStyles from '../component_styles/SignInStyles';
+/**
+ * Sign Up Auth Page.
+ * 
+ * This page allow user to sign up using their information such as email, password and username. With that they can use email and password to log in later.
+ * 
+ * @component
+ * @returns {JSX.Element} The rendered SignUp component.
+ */
+
+const SignUp = () => {
+  // access global context for state of the user, preventing logout automatically
+  const {setUser, setIsLogged} = useGlobalContext();
+  // manage submitting status
+  const [isSubmitting, setSubmitting] = useState(false);
+  // mange form inputs
+  const [form, setForm] = useState({
+    username: '',
+    email: '',
+    password: ''
+  })
+
+  /**
+   * Validates an email address.
+   * 
+   * @function isValidEmail
+   * @param {string} email - The email address that are going to be evaluated
+   * @returns {boolean} - return true upon validation, else-false
+   */
+  const isValidEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  /**
+   * Handles form submission for sign-up.
+   * 
+   * Validates the form, attempts to sign in the user,
+   * if the sign in successful, router will redirect the user to the homepage
+   *
+   * @aysnc
+   * @function
+   * @name submit
+   * @throws {Error} If sign-up fails
+   */
+  const submit = async () => {
+    if(!form.username || !form.email || !form.password) {
+      Alert.alert('Error', 'Fill in all the field')
+    }
+
+    if (!isValidEmail(form.email)) {
+      Alert.alert('Error', 'Please enter a valid email address');
+      return;
+    }
+
+    console.log("Submitting with email:", form.email);
+
+    setSubmitting(true);
+    
+    try {
+      const result = await createUser(form.email, form.password, form.username)
+
+      console.log("User created:", result);
+      setUser(result);
+      setIsLogged(true);
+      //const session = await signIn(form.email, form.password);
+
+      router.replace('/home')
+
+    } catch (error) {
+      console.error("Error details:", error);
+      Alert.alert('Error', error.message)
+    } finally {
+      setSubmitting(false)
+    }
+  };
+
+  return (
+
+    &lt;SafeAreaView style={signUpStyles.container}>
+    &lt;StatusBar style="light"/>
+    &lt;View style={signUpStyles.formContainer}>
+      &lt;View style={signUpStyles.titleRow}>
+        &lt;Text style={signUpStyles.title}>Sign Up to FNTA&lt;/Text>
+      &lt;/View>
+      &lt;FormField
+        title='Username'
+        value={form.username}
+        handleChangeText={(e) => setForm({ ...form, username: e })}
+      />
+      &lt;FormField
+        title='Email'
+        value={form.email}
+        handleChangeText={(e) => setForm({ ...form, email: e.trim() })}
+        autoCapitalize="none"
+        keyboardType="email-address"
+      />
+      &lt;FormField
+        title='Password'
+        value={form.password}
+        handleChangeText={(e) => setForm({ ...form, password: e })}
+      />
+      &lt;CustomButton
+        title='Sign Up'
+        handlePress={submit}
+        containerStyles={signUpStyles.buttonContainer}
+        isLoading={isSubmitting}
+      />
+      &lt;View>
+        &lt;Text style={signUpStyles.signUpText}>Got an account already?&lt;/Text>
+        &lt;TouchableOpacity style={signUpStyles.signUpLinkContainer}>
+          &lt;Link href='/sign-in' style={signUpStyles.signUpLink}>Sign In&lt;/Link>
+        &lt;/TouchableOpacity>
+      &lt;/View>
+    &lt;/View>
+  &lt;/SafeAreaView>
+);
+};
+
+export default SignUp
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#AuthLayout">AuthLayout</a></li><li><a href="global.html#CreateSplit">CreateSplit</a></li><li><a href="global.html#CustomButton">CustomButton</a></li><li><a href="global.html#FormField">FormField</a></li><li><a href="global.html#GlobalContext">GlobalContext</a></li><li><a href="global.html#GlobalProvider">GlobalProvider</a></li><li><a href="global.html#Home">Home</a></li><li><a href="global.html#ManageWorkout">ManageWorkout</a></li><li><a href="global.html#Profile">Profile</a></li><li><a href="global.html#RootLayout">RootLayout</a></li><li><a href="global.html#SignIn">SignIn</a></li><li><a href="global.html#SignUp">SignUp</a></li><li><a href="global.html#TabsLayout">TabsLayout</a></li><li><a href="global.html#Timer">Timer</a></li><li><a href="global.html#WorkoutLayout">WorkoutLayout</a></li><li><a href="global.html#addExerciseToWorkout">addExerciseToWorkout</a></li><li><a href="global.html#addSet">addSet</a></li><li><a href="global.html#createExercise">createExercise</a></li><li><a href="global.html#createExerciseSet">createExerciseSet</a></li><li><a href="global.html#createUser">createUser</a></li><li><a href="global.html#createWorkout">createWorkout</a></li><li><a href="global.html#fetchPreviousWeekData">fetchPreviousWeekData</a></li><li><a href="global.html#fetchWorkout">fetchWorkout</a></li><li><a href="global.html#formatTime">formatTime</a></li><li><a href="global.html#getCurrentUser">getCurrentUser</a></li><li><a href="global.html#getUserWorkouts">getUserWorkouts</a></li><li><a href="global.html#handleAddExercise">handleAddExercise</a></li><li><a href="global.html#handleAddSplit">handleAddSplit</a></li><li><a href="global.html#handleDoneExercise">handleDoneExercise</a></li><li><a href="global.html#handleDoneWorkout">handleDoneWorkout</a></li><li><a href="global.html#handleInputChange">handleInputChange</a></li><li><a href="global.html#handlePresetRestTime">handlePresetRestTime</a></li><li><a href="global.html#handleSplitPress">handleSplitPress</a></li><li><a href="global.html#handleTimerSheet">handleTimerSheet</a></li><li><a href="global.html#isValidEmail">isValidEmail</a></li><li><a href="global.html#loadWorkout">loadWorkout</a></li><li><a href="global.html#logOut">logOut</a></li><li><a href="global.html#logout">logout</a></li><li><a href="global.html#pauseTimer">pauseTimer</a></li><li><a href="global.html#recommendedHypertrophy">recommendedHypertrophy</a></li><li><a href="global.html#recommendedRestTime">recommendedRestTime</a></li><li><a href="global.html#resetTimer">resetTimer</a></li><li><a href="global.html#saveWorkoutSets">saveWorkoutSets</a></li><li><a href="global.html#signIn">signIn</a></li><li><a href="global.html#startNewSession">startNewSession</a></li><li><a href="global.html#startTimer">startTimer</a></li><li><a href="global.html#strengthRestTime">strengthRestTime</a></li><li><a href="global.html#submit">submit</a></li><li><a href="global.html#updateWeekNumber">updateWeekNumber</a></li><li><a href="global.html#useGlobalContext">useGlobalContext</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.3</a> on Mon Aug 12 2024 06:52:53 GMT+0100 (British Summer Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
