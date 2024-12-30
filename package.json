@@ -1,0 +1,41 @@
+{
+  "name": "dissertation_project",
+  "version": "1.0.0",
+  "main": "expo-router/entry",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
+    "web": "expo start --web",
+    "test": "jest",
+    "docs": "jsdoc -d docs --configure jsdocConf.json"
+  },
+  "dependencies": {
+    "@gorhom/bottom-sheet": "^4.6.3",
+    "expo": "~51.0.17",
+    "expo-constants": "~16.0.2",
+    "expo-linking": "~6.3.1",
+    "expo-router": "~3.5.17",
+    "expo-status-bar": "~1.12.1",
+    "nativewind": "^4.0.1",
+    "react": "18.2.0",
+    "react-native": "0.74.1",
+    "react-native-appwrite": "^0.4.0",
+    "react-native-gesture-handler": "~2.16.1",
+    "react-native-reanimated": "~3.10.1",
+    "react-native-safe-area-context": "4.10.1",
+    "react-native-screens": "3.31.1",
+    "react-native-toast-message": "^2.2.0",
+    "react-native-url-polyfill": "^2.0.0",
+    "tailwindcss": "^3.4.7"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.20.0",
+    "@babel/preset-env": "^7.25.3",
+    "@babel/preset-react": "^7.24.7",
+    "docdash": "^2.0.2",
+    "jsdoc": "^4.0.3",
+    "metro-react-native-babel-preset": "^0.77.0"
+  },
+  "private": true
+}
